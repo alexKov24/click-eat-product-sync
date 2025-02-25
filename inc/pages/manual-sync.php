@@ -25,6 +25,7 @@ function clickeat_manual_sync_page()
 
     $options = get_option('clickeat_settings');
     $api_url = isset($options['api_url']) ? $options['api_url'] : '';
+    $sync_img = $options['is_sync_img'];
 ?>
     <div class="wrap">
         <h2>Sync Using Ajax</h2>
@@ -32,6 +33,7 @@ function clickeat_manual_sync_page()
         <p>You can set the limit on products fetched using limit.
             Since products are fetched in batches, the number should be devisible by batch size (5)</p>
         <p><?php echo $api_url; ?></p>
+        <p>img sync set to <?php echo $sync_img; ?></p>
 
         <div id="sync-progress" style="display: none;">
             <div class="progress-bar-wrapper" style="width: 100%; background: #f0f0f0; padding: 2px; margin: 10px 0;">

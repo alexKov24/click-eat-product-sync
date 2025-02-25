@@ -7,6 +7,8 @@
  */
 function setupCategories($cats)
 {
+    $options = get_option('clickeat_settings');
+    $sync_img = $options['is_sync_img'];
 
     foreach ($cats as $cat) {
         [
@@ -34,7 +36,7 @@ function setupCategories($cats)
             $term_id = $term->term_id;
         }
 
-        if ($imageUrl) {
+        if ($sync_img && $imageUrl) {
             $source_img_url = get_term_meta($term_id, 'image_url', true);
             $current_attach_id = get_term_meta($term_id, 'image_id', true);
             if ($imageUrl != $source_img_url || empty($current_attach_id)) {

@@ -58,6 +58,14 @@ function clickeat_register_settings()
     );
 
     add_settings_field(
+        'is_sync_img',
+        'Sync Images',
+        'clickeat_is_sync_img_field',
+        'clickeat-settings',
+        'cron_settings'
+    );
+
+    add_settings_field(
         'cron_interval',
         'Sync Interval',
         'clickeat_cron_interval_field',
@@ -188,6 +196,13 @@ function clickeat_api_url_field()
     echo "<input type='text' name='clickeat_settings[api_url]' value='" . esc_attr($value) . "' class='regular-text'>";
 }
 
+function clickeat_is_sync_img_field()
+{
+    $options = get_option('clickeat_settings');
+    $checked = isset($options['is_sync_img']) ? checked($options['is_sync_img'], 1, false) : '';
+    echo "<input type='checkbox' name='clickeat_settings[is_sync_img]' value='1' {$checked}> Sync Images";
+}
+
 function clickeat_cron_enabled_field()
 {
     $options = get_option('clickeat_settings');
@@ -226,6 +241,7 @@ function clickeat_sanitize_settings($input)
     $sanitized['branch_post_type'] = sanitize_text_field($input['branch_post_type']);
 
     // Sanitize cron settings
+    $sanitized['is_sync_img'] = isset($input['is_sync_img']) ? 1 : 0;
     $sanitized['cron_enabled'] = isset($input['cron_enabled']) ? 1 : 0;
     $sanitized['cron_interval'] = sanitize_text_field($input['cron_interval']);
     $sanitized['cron_offset'] = intval($input['cron_offset']);

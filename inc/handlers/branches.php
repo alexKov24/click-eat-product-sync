@@ -10,6 +10,7 @@ function setupBranches($branches)
 {
 
     $options = get_option('clickeat_settings');
+    $sync_img = $options['is_sync_img'];
 
     if (!isset($options['branch_post_type']) || empty($options['branch_post_type'])) {
         throw new Exception('[ERROR] Cannot create branch post. Branch post type not set');
@@ -56,7 +57,7 @@ function setupBranches($branches)
         }
 
 
-        if ($logoUrl) {
+        if ($sync_img && $logoUrl) {
             $original_logo_url = get_post_meta($post_id, 'logo', true);
             if ($logoUrl != $original_logo_url) {
                 delete_post_thumbnail_and_file($post_id);

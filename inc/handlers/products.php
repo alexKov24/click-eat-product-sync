@@ -17,6 +17,7 @@ function setupProducts($products, $product_limit = -1)
 
     $product_post_type = $options['product_post_type'];
 
+    $sync_img = $options['is_sync_img'];
 
     $products_num = 0;
     foreach ($products as $product) {
@@ -73,7 +74,7 @@ function setupProducts($products, $product_limit = -1)
         }
 
         // Handle image
-        if ($imageUrl) {
+        if ($sync_img && $imageUrl) {
             $source_img_url = get_post_meta($post_id, 'source_img_url', true);
             if ($imageUrl != $source_img_url) {
                 delete_post_thumbnail_and_file($post_id);
