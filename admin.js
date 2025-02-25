@@ -5,6 +5,16 @@ jQuery(document).ready(function ($) {
         constructor() {
             this.processed = 0;
             this.totalItems = 0;
+
+            this.processedCategories = 0;
+            this.totalCategories = 0;
+            this.processedSubcategories = 0;
+            this.totalSubcategories = 0;
+            this.processedBranches = 0;
+            this.totalBranches = 0;
+            this.processedProducts = 0;
+            this.totalProducts = 0;
+
             this.batchSize = 5;
             this.maxProducts = 0;
         }
@@ -20,12 +30,18 @@ jQuery(document).ready(function ($) {
             this.showLoadingState();
             const formData = $('#sync-form').serializeArray();
             this.maxProducts = this.getMaxProducts(formData);
+            this.batchSize = this.getBatchSize(formData);
             this.startSync();
         }
 
         showLoadingState() {
             $('#sync-progress').show();
             $('#sync-form input[type="submit"]').prop('disabled', true);
+        }
+
+        getBatchSize(formData) { 
+            const batchSizeField = formData.find(field => field.name === 'batch_size');
+            return batchSizeField ? parseInt(batchSizeField.value) : 5;
         }
 
         getMaxProducts(formData) {
@@ -40,8 +56,12 @@ jQuery(document).ready(function ($) {
                     throw new Error('Failed to fetch initial data');
                 }
 
-                const { categories, subcategories, branches ,products } = response.data;
-                this.totalItems = categories.length + subcategories.length + products.length;
+                const { categories, subcategories, branches, products } = response.data;
+                this.totalItems = categories.length + subcategories.length + branches.length + products.length;
+                this.totalBranches = branches.length;
+                this.totalCategories = categories.length;
+                this.totalSubcategories = subcategories.length;
+                this.totalProducts = products.length;
 
                 await this.syncInOrder(categories, subcategories, branches, products);
                 this.finishSync();
@@ -65,7 +85,7 @@ jQuery(document).ready(function ($) {
             await this.syncItems('categories', categories);
             await this.syncItems('subcategories', subcategories);
             await this.syncItems('branches', branches);
-            await this.syncProductsInBatches(products);
+            //await this.syncProductsInBatches(products);
         }
 
         async syncItems(type, items) {
@@ -82,7 +102,7 @@ jQuery(document).ready(function ($) {
                 }
             });
 
-            this.updateProgress(items.length);
+            this.updateProgress(items.length, type);
         }
 
         async syncProductsInBatches(products) {
@@ -103,15 +123,31 @@ jQuery(document).ready(function ($) {
             return batches;
         }
 
-        updateProgress(processedItems) {
+        updateProgress(processedItems, type = '') {
             this.processed += processedItems;
+
+            if (type === 'categories') {
+                this.processedCategories += processedItems;
+            } else if (type === 'subcategories') {
+                this.processedSubcategories += processedItems;
+            } else if (type === 'branches') {
+                this.processedBranches += processedItems;
+            } else if (type === 'products') {
+                this.processedProducts += processedItems;
+            }
+
             const percentage = Math.round((this.processed / this.totalItems) * 100);
             $('#sync-progress-bar').css('width', percentage + '%');
-            $('#sync-status').text(`Processing... ${percentage}% (${this.processed}/${this.totalItems})`);
+            $('#sync-status').html(`Processing... ${percentage}% (${this.processed}/${this.totalItems})` +
+                `<br/>(${this.processedCategories}/${this.totalCategories}) categories, ` +
+                `<br/>(${this.processedSubcategories}/${this.totalSubcategories}) subcategories, ` +
+                `<br/>(${this.processedBranches}/${this.totalBranches}) branches, ` +
+                `<br/>(${this.processedProducts}/${this.totalProducts}) products`
+            );
         }
 
         finishSync() {
-            $('#sync-status').text('Sync completed successfully!');
+            $('#sync-status').html($('#sync-status').html() + '<br/>Sync completed successfully!');
             $('#sync-form input[type="submit"]').prop('disabled', false);
         }
 

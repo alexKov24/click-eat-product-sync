@@ -21,19 +21,41 @@ function setupCategories($cats)
             'hours' => $businessHours
         ] = $cat;
 
-        $term = get_term_by('name', $name, 'products_category');
 
-        if (!$term) {
+        error_log("Category: $id");
 
+        $terms = get_terms([
+            'taxonomy' => 'products_category',
+            'hide_empty' => false,
+            'parent' => 0,
+            'meta_query' => [
+                [
+                    'key' => 'clickeat-category_id',
+                    'value' => $id,
+                    'compare' => '='
+                ]
+            ],
+            'number' => 1
+        ]);
+
+        if (isset($terms[0])) {
+
+            $term_id = $terms[0]->term_id;
+        } else {
             $termData = wp_insert_term($name, 'products_category');
 
             if (!is_wp_error($termData)) {
                 $term_id = $termData['term_id'];
             } else {
-                continue;
+
+                // in case of a duplicate category
+                if ($termData->get_error_code() == 'term_exists') {
+                    $termData = wp_insert_term($name . '_' . $id, 'products_category');
+                    $term_id = $termData['term_id'];
+                } else {
+                    continue;
+                }
             }
-        } else {
-            $term_id = $term->term_id;
         }
 
         if ($sync_img && $imageUrl) {
@@ -55,10 +77,13 @@ function setupCategories($cats)
             }
         }
 
-        update_term_meta($term_id, 'clickeat_id', $id);
+        update_term_meta($term_id, 'clickeat-category_id', $id);
         update_term_meta($term_id, 'description', $description);
         update_term_meta($term_id, 'is_active', $isActive);
         update_term_meta($term_id, 'order', $order);
         update_term_meta($term_id, 'business_hours', $businessHours);
+
+
+        error_log("Category created: $term_id");
     }
 }

@@ -43,6 +43,7 @@ function clickeat_manual_sync_page()
         </div>
 
         <form method="post" action="" id="sync-form">
+            <input type="number" min="5" name="batch_size" value="10" placeholder="Batch Size" style="width: 200px;">
             <input type="number" name="max_sync_products" value="10" placeholder="Max products to sync" style="width: 200px;">
             <input type="submit" name="sync_now" class="button button-primary" value="Sync Now">
         </form>
