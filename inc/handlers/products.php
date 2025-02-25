@@ -45,8 +45,8 @@ function setupProducts($products, $product_limit = -1)
         // Check if product exists by SKU
         $existing_product = get_posts([
             'post_type' => $product_post_type,
-            'meta_key' => 'sku',
-            'meta_value' => $sku,
+            'meta_key' => 'clickeat_id',
+            'meta_value' => $id,
             'posts_per_page' => 1,
             'post_status' => ['publish', 'draft']
         ]);
