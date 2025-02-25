@@ -3,7 +3,7 @@
 Plugin Name: ClickEat Products Sync
 Plugin URI: https://webchad.tech
 Description: Syncs products, categories and subcategories from ClickEat API
-Version: 2025.02.23
+Version: 2025.02.24
 Author: Alex Kovalev
 */
 
@@ -19,9 +19,7 @@ add_action('init', function () {
 define('CLICKEAT_SYNC_PATH', plugin_dir_path(__FILE__));
 define('CLICKEAT_SYNC_URL', plugin_dir_url(__FILE__));
 define('CLICKEAT_SYNC_MAIN_FILE', __FILE__);
-define('CLICKEAT_SYNC_VERSION', '2025.02.23');
 
-require_once CLICKEAT_SYNC_PATH . 'inc/update/check_update.php';
 
 require_once CLICKEAT_SYNC_PATH . 'inc/handlers/branches.php';
 require_once CLICKEAT_SYNC_PATH . 'inc/handlers/products.php';
@@ -122,3 +120,23 @@ function update_items_and_categories($json, $product_limit)
         return false;
     }
 }
+
+
+
+
+/**
+ * Initialize the GitHub updater
+ */
+function my_plugin_init_updater()
+{
+    // Include the updater class
+    require_once CLICKEAT_SYNC_PATH . 'inc/update/GitHubPluginUpdater.php';
+
+    // Initialize the updater
+    new GitHubPluginUpdater(
+        plugin_basename(CLICKEAT_SYNC_MAIN_FILE),  // The plugin file relative to plugins directory
+        'alexKov24',           // Your GitHub username
+        'click-eat-product-sync'                // Your GitHub repository name
+    );
+}
+add_action('init', 'my_plugin_init_updater');
