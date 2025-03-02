@@ -40,7 +40,10 @@ function setupProducts($products, $product_limit = -1)
             'is_hidden' => $isHidden,
             'ordr' => $order,
             'tags' => $tags
-        ] = $product;
+        ] = apply_filters('before_clickeat_product_handler', $product);
+
+
+
 
         // Check if product exists by SKU
         $existing_product = get_posts([
@@ -90,7 +93,7 @@ function setupProducts($products, $product_limit = -1)
         if ($categoryId) {
             $category_terms = get_terms([
                 'taxonomy' => 'products_category',
-                'meta_key' => 'clickeat_id',
+                'meta_key' => 'clickeat-category_id',
                 'meta_value' => $categoryId,
                 'hide_empty' => false
             ]);
@@ -102,7 +105,7 @@ function setupProducts($products, $product_limit = -1)
                 if ($subcategoryId) {
                     $subcategory_terms = get_terms([
                         'taxonomy' => 'products_category',
-                        'meta_key' => 'clickeat_id',
+                        'meta_key' => 'clickeat-subcategory_id',
                         'meta_value' => $subcategoryId,
                         'hide_empty' => false,
                         'parent' => $category_terms[0]->term_id
@@ -123,7 +126,6 @@ function setupProducts($products, $product_limit = -1)
         update_post_meta($post_id, 'subcategory_id', $subcategoryId);
         update_post_meta($post_id, 'clickeat_id', $id);
         update_post_meta($post_id, 'sku', $sku);
-        update_post_meta($post_id, 'branches', $branches);
         update_post_meta($post_id, 'price', $price);
         update_post_meta($post_id, 'sale_text', $saleText);
         update_post_meta($post_id, 'business_hours', $businessHours);
@@ -131,5 +133,14 @@ function setupProducts($products, $product_limit = -1)
         update_post_meta($post_id, 'order', $order);
         update_post_meta($post_id, 'tags', $tags);
         update_post_meta($post_id, 'source_img_url', $imageUrl);
+
+
+        // update branches seperatley
+        delete_post_meta($post_id, 'branch');
+        delete_post_meta($post_id, 'branches');
+
+        foreach ($branches as $branch) {
+            update_post_meta($post_id, 'branch', $branch, false);
+        }
     }
 }

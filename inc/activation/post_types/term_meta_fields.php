@@ -30,14 +30,32 @@ function add_term_fields($term)
                 echo '<tr><td colspan="2">No meta data found for this term.</td></tr>';
             } else {
                 foreach ($all_meta as $key => $values) {
-                    $value = $values[0];
-                    if (is_serialized($value)) {
-                        $value = maybe_unserialize($value);
-                        $value = print_r($value, true);
-                    }
                     echo '<tr>';
                     echo '<td class="key">' . esc_html($key) . '</td>';
-                    echo '<td>' . esc_html($value) . '</td>';
+                    echo '<td>';
+
+                    if (count($values) > 1) {
+                        // Multiple values for this key
+                        echo '<ul>';
+                        foreach ($values as $single_value) {
+                            if (is_serialized($single_value)) {
+                                $single_value = maybe_unserialize($single_value);
+                                $single_value = print_r($single_value, true);
+                            }
+                            echo '<li>' . esc_html($single_value) . '</li>';
+                        }
+                        echo '</ul>';
+                    } else {
+                        // Single value
+                        $value = $values[0];
+                        if (is_serialized($value)) {
+                            $value = maybe_unserialize($value);
+                            $value = print_r($value, true);
+                        }
+                        echo esc_html($value);
+                    }
+
+                    echo '</td>';
                     echo '</tr>';
                 }
             }
