@@ -21,13 +21,10 @@ function setupCategories($cats)
             'hours' => $businessHours
         ] = $cat;
 
-
-        error_log("Category: $id");
-
         $terms = get_terms([
+            'parent' => 0, // get only top level categories
             'taxonomy' => 'products_category',
             'hide_empty' => false,
-            'parent' => 0,
             'meta_query' => [
                 [
                     'key' => 'clickeat-category_id',

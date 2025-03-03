@@ -38,14 +38,13 @@ function setupProducts($products, $product_limit = -1)
             'sale_text' => $saleText,
             'hours' => $businessHours,
             'is_hidden' => $isHidden,
-            'ordr' => $order,
-            'tags' => $tags
+            'ordr' => $order
         ] = apply_filters('before_clickeat_product_handler', $product);
 
 
 
 
-        // Check if product exists by SKU
+        // Check if product exists by clickeat_id
         $existing_product = get_posts([
             'post_type' => $product_post_type,
             'meta_key' => 'clickeat_id',
@@ -88,38 +87,8 @@ function setupProducts($products, $product_limit = -1)
             }
         }
 
+        setupProductCategory($post_id, $categoryId, $subcategoryId);
 
-        // Set categories and subcategories
-        if ($categoryId) {
-            $category_terms = get_terms([
-                'taxonomy' => 'products_category',
-                'meta_key' => 'clickeat-category_id',
-                'meta_value' => $categoryId,
-                'hide_empty' => false
-            ]);
-
-            if (!empty($category_terms)) {
-                $terms_to_set = [$category_terms[0]->term_id];
-
-                // Add subcategory if exists
-                if ($subcategoryId) {
-                    $subcategory_terms = get_terms([
-                        'taxonomy' => 'products_category',
-                        'meta_key' => 'clickeat-subcategory_id',
-                        'meta_value' => $subcategoryId,
-                        'hide_empty' => false,
-                        'parent' => $category_terms[0]->term_id
-                    ]);
-
-                    if (!empty($subcategory_terms)) {
-                        $terms_to_set[] = $subcategory_terms[0]->term_id;
-                    }
-                }
-
-                // Set both terms at once (overrides)
-                wp_set_object_terms($post_id, $terms_to_set, 'products_category');
-            }
-        }
 
         // Update meta fields
         update_post_meta($post_id, 'category_id', $categoryId);
@@ -143,4 +112,48 @@ function setupProducts($products, $product_limit = -1)
             update_post_meta($post_id, 'branch', $branch, false);
         }
     }
+}
+
+
+function setupProductCategory($post_id, $categoryId, $subcategoryId)
+{
+    // Set categories and subcategories
+    if (!$categoryId)  return;
+
+
+    $category_terms = get_terms([
+        'parent' => 0,
+        'taxonomy' => 'products_category',
+        'hide_empty' => false,
+        'meta_query' => [
+            [
+                'key' => 'clickeat-category_id',
+                'value' => $categoryId,
+                'compare' => '='
+            ]
+        ],
+        'number' => 1
+    ]);
+
+    if (empty($category_terms)) return;
+
+    $terms_to_set = [$category_terms[0]->term_id];
+
+    // Add subcategory if exists
+    if ($subcategoryId) {
+        $subcategory_terms = get_terms([
+            'taxonomy' => 'products_category',
+            'meta_key' => 'clickeat-subcategory_id',
+            'meta_value' => $subcategoryId,
+            'hide_empty' => false,
+            'parent' => $category_terms[0]->term_id
+        ]);
+
+        if (!empty($subcategory_terms)) {
+            $terms_to_set[] = $subcategory_terms[0]->term_id;
+        }
+    }
+
+    // Set both terms at once (overrides)
+    wp_set_object_terms($post_id, $terms_to_set, 'products_category');
 }
