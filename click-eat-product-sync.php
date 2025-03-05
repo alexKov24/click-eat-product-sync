@@ -3,7 +3,7 @@
 Plugin Name: ClickEat Products Sync
 Plugin URI: https://webchad.tech
 Description: Syncs products, categories and subcategories from ClickEat API
-Version: 0.0.2
+Version: 0.0.6
 Author: Alex Kovalev
 */
 
