@@ -1,16 +1,20 @@
 <?php
 
 
-
-// Add Log Viewer submenu
-add_submenu_page(
-    'clickeat-sync',
-    'Log Viewer',
-    'Log Viewer',
-    'manage_options',
-    'clickeat-log-viewer',
-    'clickeat_log_viewer_page'
-);
+// Add to your existing admin_menu action
+add_action('admin_menu', 'clickeat_add_log_page');
+function clickeat_add_log_page()
+{
+    // Add Log Viewer submenu
+    add_submenu_page(
+        'clickeat-sync',
+        'Log Viewer',
+        'Log Viewer',
+        'manage_options',
+        'clickeat-log-viewer',
+        'clickeat_log_viewer_page'
+    );
+}
 
 
 // Log Viewer Page
@@ -70,6 +74,7 @@ function clickeat_log_viewer_page()
                 <input type="submit" name="clear_logs" class="button button-secondary"
                     value="Clear Old Logs" onclick="return confirm('Are you sure you want to delete old logs?');">
                 <select name="days_to_keep">
+                    <option value="0">All</option>
                     <option value="7">Older than 7 days</option>
                     <option value="30" selected>Older than 30 days</option>
                     <option value="90">Older than 90 days</option>
@@ -81,9 +86,9 @@ function clickeat_log_viewer_page()
         <table class="wp-list-table widefat fixed striped">
             <thead>
                 <tr>
-                    <th>Time</th>
-                    <th>Level</th>
-                    <th>Source</th>
+                    <th style="width:10%">Time</th>
+                    <th style="width:10%">Level</th>
+                    <th style="width:10%">Source</th>
                     <th>Message</th>
                 </tr>
             </thead>

@@ -25,12 +25,10 @@ function add_product_meta_boxes()
         'high'
     );
 }
-
 function product_display_readonly_meta_fields($post)
 {
     // Get ALL meta data for this post
     $all_meta = get_post_meta($post->ID);
-
 ?>
     <style>
         .meta-table {
@@ -53,18 +51,23 @@ function product_display_readonly_meta_fields($post)
     <table class="meta-table">
         <?php
         foreach ($all_meta as $key => $values) {
-            // Meta values are always stored in an array, even single values
-            $value = $values[0];
-
-            // Check if value is serialized (like arrays or objects)
-            if (is_serialized($value)) {
-                $value = maybe_unserialize($value);
-                $value = print_r($value, true); // Convert array/object to string
-            }
-
             echo '<tr>';
             echo '<td class="key">' . esc_html($key) . '</td>';
-            echo '<td>' . esc_html($value) . '</td>';
+            echo '<td>';
+            
+            // Handle each value in the array
+            foreach ($values as $value) {
+                // Check if value is serialized
+                if (is_serialized($value)) {
+                    $value = maybe_unserialize($value);
+                    $value = print_r($value, true); // Convert array/object to string
+                }
+                
+                // Display each value on a new line
+                echo esc_html($value) . '<br>';
+            }
+            
+            echo '</td>';
             echo '</tr>';
         }
         ?>

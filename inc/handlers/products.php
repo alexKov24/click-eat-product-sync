@@ -45,7 +45,8 @@ function setupProducts($products, $product_limit = -1)
         ] = apply_filters('before_clickeat_product_handler', $product);
 
 
-        $logger->log('log', "Syncing product $name $id, with data ".print_r($product,true));
+        $logger->log('Sync Begin', "Syncing product $name $id");
+        $logger->log('log', "Syncing data ".print_r($product,true));
 
 
         // Check if product exists by clickeat_id
@@ -71,7 +72,7 @@ function setupProducts($products, $product_limit = -1)
             $logger->log('log', "product created  $post_id");
         } else {
             $post_id = $existing_product[0]->ID;
-            $logger->log('log',"product found $post_id")
+            $logger->log('log',"product found $post_id");
 
             // Update existing product
             wp_update_post([
@@ -116,11 +117,14 @@ function setupProducts($products, $product_limit = -1)
 
         // update branches seperatley
         delete_post_meta($post_id, 'branch');
-        delete_post_meta($post_id, 'branches');
 
         foreach ($branches as $branch) {
-            update_post_meta($post_id, 'branch', $branch, false);
+            $logger->log('log', "adding branch $branch");
+            add_post_meta($post_id, 'branch', $branch, false);
         }
+
+        $saved_branches = get_post_meta($post_id, 'branch', false);
+        $logger->log('log', "Saved branches: " . print_r($saved_branches, true));        
     }
 }
 

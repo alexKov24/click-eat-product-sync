@@ -105,8 +105,19 @@ function delete_attachments_with_missing_files()
 // Function to delete orphaned product image meta
 function delete_orphaned_product_image_meta()
 {
+
+
+    $options = get_option('clickeat_settings');
+
+    if (!isset($options['product_post_type']) || empty($options['product_post_type'])) {
+        return;
+    }
+
+    $product_post_type = $options['product_post_type'];
+
+
     $args = array(
-        'post_type' => 'product',
+        'post_type' => $product_post_type,
         'posts_per_page' => -1,
         'post_status' => 'any'
     );

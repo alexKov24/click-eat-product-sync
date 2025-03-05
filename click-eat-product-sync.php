@@ -3,7 +3,7 @@
 Plugin Name: ClickEat Products Sync
 Plugin URI: https://webchad.tech
 Description: Syncs products, categories and subcategories from ClickEat API
-Version: 0.0.2
+Version: 0.0.3
 Author: Alex Kovalev
 */
 
@@ -28,8 +28,10 @@ require_once CLICKEAT_SYNC_PATH . 'inc/handlers/subCategories.php';
 
 
 require_once CLICKEAT_SYNC_PATH . 'inc/activation/handleActivation.php';
+require_once CLICKEAT_SYNC_PATH . 'inc/logger/Logger.php';
 require_once CLICKEAT_SYNC_PATH . 'inc/pages/settings.php'; // must be first page to load
 require_once CLICKEAT_SYNC_PATH . 'inc/pages/manual-sync.php';
+require_once CLICKEAT_SYNC_PATH . 'inc/pages/log.php';
 require_once CLICKEAT_SYNC_PATH . 'inc/pages/cleanup.php';
 require_once CLICKEAT_SYNC_PATH . 'inc/pages/delte-products.php';
 require_once CLICKEAT_SYNC_PATH . 'inc/img-helpers.php';

@@ -1,5 +1,7 @@
 jQuery(document).ready(function ($) {
 
+    let responseData;
+
         
     class SyncManager {
         constructor() {
@@ -24,19 +26,68 @@ jQuery(document).ready(function ($) {
                 e.preventDefault();
                 this.handleFormSubmit();
             });
+
+            $('#sync-one-product').on('submit', (e) => {
+                e.preventDefault();
+                this.handleSingleItemFormSubmit();
+            });
+        }
+
+        async handleSingleItemFormSubmit() { 
+
+            this.showLoadingState('#sync-one-product');
+
+            try {
+
+
+                const formData = $('#sync-one-product').serializeArray();
+                const product_id_field = formData.find(field => field.name === 'product_id');
+                const product_id = product_id_field.value;
+
+                $('#sync-status').html('searching for ', product_id);
+
+                if (!product_id) return;
+
+                const response = await this.fetchInitialData();
+                if (!response.success) {
+                    $('#sync-status').html('Failed to fetch initial data');
+                    throw new Error('Failed to fetch initial data');
+                }
+
+                const { categories, subcategories, branches, products } = response.data;
+
+                console.log('got products', products);
+
+                const productData = this.findInProducts(products, product_id);
+
+                $('#sync-status').html("syncing one product, ", productData);
+                await this.syncItems('products', [productData]);
+            } catch (error) {
+                this.handleError('Sync failed: ' + error.message);
+            }
+        }
+
+        findInProducts(products, product_id) { 
+            for(const prod of products) {
+                console.log(prod);
+                if (prod.id == product_id) { 
+                    console.log('match');
+                    return prod;
+                }
+            }
         }
 
         handleFormSubmit() {
-            this.showLoadingState();
+            this.showLoadingState('#sync-form');
             const formData = $('#sync-form').serializeArray();
             this.maxProducts = this.getMaxProducts(formData);
             this.batchSize = this.getBatchSize(formData);
             this.startSync();
         }
 
-        showLoadingState() {
+        showLoadingState(formId) {
             $('#sync-progress').show();
-            $('#sync-form input[type="submit"]').prop('disabled', true);
+            $(formId+' input[type="submit"]').prop('disabled', true);
         }
 
         getBatchSize(formData) { 
