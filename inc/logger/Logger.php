@@ -34,6 +34,12 @@ class WpDatabaseLogger
 
     public function log($level, $message, $source = '')
     {
+
+        $options = get_option('clickeat_settings');
+        $log_enabled = isset($options['log_enabled']) ? $options['log_enabled'] : false;
+
+        if(!$log_enabled) return;
+
         global $wpdb;
 
         $wpdb->insert(

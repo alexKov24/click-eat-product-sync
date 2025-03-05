@@ -81,7 +81,7 @@ function clickeat_register_settings()
         'cron_settings'
     );
 
-    // Cron Section
+    // Post section
     add_settings_section(
         'product_settings',
         'Product Settings',
@@ -104,6 +104,23 @@ function clickeat_register_settings()
         'clickeat-settings',
         'product_settings'
     );
+ 
+
+    // Log Section
+    add_settings_section(
+        'log_settings',
+        'Log Settings',
+        null,
+        'clickeat-settings'
+    );
+
+    add_settings_field(
+        'log_enabled',
+        'Log Enabled',
+        'clickeat_log_enabled_field',
+        'clickeat-settings',
+        'log_settings'
+    );    
 }
 
 // Settings page display
@@ -132,6 +149,16 @@ function clickeat_sync_page()
 
     </div>
 <?php
+}
+
+
+
+
+function clickeat_log_enabled_field()
+{
+    $options = get_option('clickeat_settings');
+    $checked = isset($options['log_enabled']) ? checked($options['log_enabled'], 1, false) : '';
+    echo "<input type='checkbox' name='clickeat_settings[log_enabled]' value='1' {$checked}> Enable Log";
 }
 
 function clickeat_custom_product_post_type_field()
@@ -245,6 +272,8 @@ function clickeat_sanitize_settings($input)
     $sanitized['cron_enabled'] = isset($input['cron_enabled']) ? 1 : 0;
     $sanitized['cron_interval'] = sanitize_text_field($input['cron_interval']);
     $sanitized['cron_offset'] = intval($input['cron_offset']);
+
+    $sanitized['log_enabled'] = isset($input['log_enabled']) ? 1 : 0;
 
     // Update cron schedule if settings changed
     $old_options = get_option('clickeat_settings');
