@@ -24,8 +24,6 @@ function setupSubCategories($sub_cats)
             'ordr' => $order
         ] = $sub_cat;
 
-        error_log("Subcategory: $id");
-
         // First get the parent term by its external_id
         $parent_terms = get_terms([
             'taxonomy' => 'products_category',
@@ -111,8 +109,5 @@ function setupSubCategories($sub_cats)
         update_term_meta($term_id, 'description', $description);
         update_term_meta($term_id, 'is_active', $isActive);
         update_term_meta($term_id, 'order', $order);
-
-
-        error_log("Subcategory created: $name, $term_id");
     }
 }
