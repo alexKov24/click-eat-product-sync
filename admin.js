@@ -35,7 +35,7 @@ jQuery(document).ready(function ($) {
 
         async handleSingleItemFormSubmit() { 
 
-            this.showLoadingState('#sync-one-product');
+            $('#sync-one-product_status').show();
 
             try {
 
@@ -44,13 +44,13 @@ jQuery(document).ready(function ($) {
                 const product_id_field = formData.find(field => field.name === 'product_id');
                 const product_id = product_id_field.value;
 
-                $('#sync-status').html('searching for ', product_id);
+                $('#sync-one-product_status').html('searching for ' + product_id);
 
                 if (!product_id) return;
 
                 const response = await this.fetchInitialData();
                 if (!response.success) {
-                    $('#sync-status').html('Failed to fetch initial data');
+                    $('#sync-one-product_status').html('Failed to fetch initial data');
                     throw new Error('Failed to fetch initial data');
                 }
 
@@ -60,8 +60,9 @@ jQuery(document).ready(function ($) {
 
                 const productData = this.findInProducts(products, product_id);
 
-                $('#sync-status').html("syncing one product, ", productData);
+                $('#sync-one-product_status').html("syncing one product, <pre>" + productData + "</pre>");
                 await this.syncItems('products', [productData]);
+                $('#sync-one-product_status').html("syncing one product successfuly! <pre>" + productData + "</pre>");
             } catch (error) {
                 this.handleError('Sync failed: ' + error.message);
             }

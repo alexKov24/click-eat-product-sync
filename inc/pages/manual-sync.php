@@ -54,9 +54,11 @@ function clickeat_manual_sync_page()
         <h2>Sync Specific Product</h2>
         <p></p>
         <form method="post" action="" id="sync-one-product">
-            <input type="number" name="product_id" placeholder="Product Id in CLicketa" style="width: 200px;">
+            <input type="number" name="product_id" placeholder="Product Id in Clickeat" style="width: 200px;">
             <input type="submit" name="sync_now_product" class="button button-primary" value="Sync Now">
         </form>        
+
+        <div id="sync-one-product_status" style="display:none"></div>
 
         <h2>Sync Using Cron Hook</h2>
         <p>Used to test the fetching function after changes. Cron uses the same function</p>
