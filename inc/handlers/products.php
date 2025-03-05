@@ -9,9 +9,12 @@
 function setupProducts($products, $product_limit = -1)
 {
 
+    $logger = new \Inc\Logger\WpDatabaseLogger();
+
     $options = get_option('clickeat_settings');
 
     if (!isset($options['product_post_type']) || empty($options['product_post_type'])) {
+        $logger->log('error', 'Cannot create product post. Product post type not set');
         throw new Exception('[ERROR] Cannot create product post. Product post type not set');
     }
 
@@ -42,6 +45,7 @@ function setupProducts($products, $product_limit = -1)
         ] = apply_filters('before_clickeat_product_handler', $product);
 
 
+        $logger->log('log', "Syncing product $name $id, with data ".print_r($product,true));
 
 
         // Check if product exists by clickeat_id
@@ -54,6 +58,7 @@ function setupProducts($products, $product_limit = -1)
         ]);
 
         if (empty($existing_product)) {
+            $logger->log('log', "product not found by clickeat_id $id");
             // Create new product
             $post_data = [
                 'post_title' => $name,
@@ -63,8 +68,10 @@ function setupProducts($products, $product_limit = -1)
             ];
 
             $post_id = wp_insert_post($post_data);
+            $logger->log('log', "product created  $post_id");
         } else {
             $post_id = $existing_product[0]->ID;
+            $logger->log('log',"product found $post_id")
 
             // Update existing product
             wp_update_post([
@@ -77,18 +84,22 @@ function setupProducts($products, $product_limit = -1)
 
         // Handle image
         if ($sync_img && $imageUrl) {
+            $logger->log('log', "Syncing image for $post_id");
             $source_img_url = get_post_meta($post_id, 'source_img_url', true);
             if ($imageUrl != $source_img_url) {
                 delete_post_thumbnail_and_file($post_id);
                 $attach_id = upload_image_from_url($imageUrl);
+                $logger->log('log', 'old image deleted. new image uploaded.');
                 if (!is_wp_error($attach_id)) {
+                    $logger->log('log', "setting thumbnail for $post_id");
                     set_post_thumbnail($post_id, $attach_id);
                 }
             }
         }
 
+        $logger->log('log', "setting up product category $categoryId, subcategory $subcategoryId");
         setupProductCategory($post_id, $categoryId, $subcategoryId);
-
+        
 
         // Update meta fields
         update_post_meta($post_id, 'category_id', $categoryId);
@@ -100,7 +111,6 @@ function setupProducts($products, $product_limit = -1)
         update_post_meta($post_id, 'business_hours', $businessHours);
         update_post_meta($post_id, 'is_hidden', $isHidden);
         update_post_meta($post_id, 'order', $order);
-        update_post_meta($post_id, 'tags', $tags);
         update_post_meta($post_id, 'source_img_url', $imageUrl);
 
 

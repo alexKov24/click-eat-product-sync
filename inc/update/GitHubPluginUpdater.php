@@ -174,6 +174,7 @@ if (!class_exists('GitHubPluginUpdater')) {
             return $transient;
         }
 
+
         /**
          * Provide plugin information for the details popup
          * 

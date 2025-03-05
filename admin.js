@@ -85,7 +85,7 @@ jQuery(document).ready(function ($) {
             await this.syncItems('categories', categories);
             await this.syncItems('subcategories', subcategories);
             await this.syncItems('branches', branches);
-            //await this.syncProductsInBatches(products);
+            await this.syncProductsInBatches(products);
         }
 
         async syncItems(type, items) {
