@@ -1,5 +1,7 @@
 <?php
 
+namespace Inc\Handlers\Product;
+
 /**
  * 
  * Creates new products by sku, sets metadata category and sub category
@@ -46,7 +48,7 @@ function setupProducts($products, $product_limit = -1)
 
 
         $logger->log('Sync Begin', "Syncing product $name $id");
-        $logger->log('log', "Syncing data ".print_r($product,true));
+        $logger->log('log', "Syncing data " . print_r($product, true));
 
 
         // Check if product exists by clickeat_id
@@ -72,7 +74,7 @@ function setupProducts($products, $product_limit = -1)
             $logger->log('log', "product created  $post_id");
         } else {
             $post_id = $existing_product[0]->ID;
-            $logger->log('log',"product found $post_id");
+            $logger->log('log', "product found $post_id");
 
             // Update existing product
             wp_update_post([
@@ -100,7 +102,7 @@ function setupProducts($products, $product_limit = -1)
 
         $logger->log('log', "setting up product category $categoryId, subcategory $subcategoryId");
         setupProductCategory($post_id, $categoryId, $subcategoryId);
-        
+
 
         // Update meta fields
         update_post_meta($post_id, 'category_id', $categoryId);
@@ -124,7 +126,7 @@ function setupProducts($products, $product_limit = -1)
         }
 
         $saved_branches = get_post_meta($post_id, 'branch', false);
-        $logger->log('log', "Saved branches: " . print_r($saved_branches, true));        
+        $logger->log('log', "Saved branches: " . print_r($saved_branches, true));
     }
 }
 

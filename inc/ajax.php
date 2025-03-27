@@ -1,4 +1,6 @@
 <?php
+
+
 // Add AJAX handlers
 add_action('wp_ajax_start_sync', 'handle_start_sync');
 add_action('wp_ajax_process_items', 'handle_process_items');
@@ -61,7 +63,7 @@ function handle_process_items()
                 setupSubCategories($items);
                 break;
             case 'products':
-                setupProducts($items);
+                \Inc\Handlers\Product\setupProducts($items);
                 break;
         }
         wp_send_json_success();
