@@ -104,7 +104,7 @@ function clickeat_register_settings()
         'clickeat-settings',
         'product_settings'
     );
- 
+
 
     // Log Section
     add_settings_section(
@@ -120,7 +120,7 @@ function clickeat_register_settings()
         'clickeat_log_enabled_field',
         'clickeat-settings',
         'log_settings'
-    );    
+    );
 }
 
 // Settings page display
@@ -240,18 +240,14 @@ function clickeat_cron_enabled_field()
 function clickeat_cron_interval_field()
 {
     $options = get_option('clickeat_settings');
-    $current = isset($options['cron_interval']) ? $options['cron_interval'] : 'hourly';
+    $current = isset($options['cron_interval']) ? $options['cron_interval'] : 'clickeat_set_hour_daily';
 
-    $intervals = [
-        'hourly' => 'Every hour',
-        'twicedaily' => 'Twice daily',
-        'daily' => 'Once daily'
-    ];
+    $intervals = clickeat_get_all_schedules();
 
     echo "<select name='clickeat_settings[cron_interval]'>";
-    foreach ($intervals as $value => $label) {
+    foreach ($intervals as $value => $schedule) {
         $selected = selected($current, $value, false);
-        echo "<option value='{$value}' {$selected}>{$label}</option>";
+        echo "<option value='{$value}' {$selected}>{$schedule['display']}</option>";
     }
     echo "</select>";
 }
@@ -279,7 +275,7 @@ function clickeat_sanitize_settings($input)
     $old_options = get_option('clickeat_settings');
     if (
         $sanitized['cron_enabled'] !== ($old_options['cron_enabled'] ?? 0) ||
-        $sanitized['cron_interval'] !== ($old_options['cron_interval'] ?? 'hourly') ||
+        $sanitized['cron_interval'] !== ($old_options['cron_interval'] ?? 'clickeat_set_hour_daily') ||
         $sanitized['cron_offset'] !== ($old_options['cron_offset'] ?? 0)
     ) {
 

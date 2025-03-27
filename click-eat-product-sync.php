@@ -19,8 +19,9 @@ add_action('init', function () {
 define('CLICKEAT_SYNC_PATH', plugin_dir_path(__FILE__));
 define('CLICKEAT_SYNC_URL', plugin_dir_url(__FILE__));
 define('CLICKEAT_SYNC_MAIN_FILE', __FILE__);
+define('CLICKEAT_TEXT_DOMAIN', 'clickeat-sync');
 
-
+require_once CLICKEAT_SYNC_PATH . 'inc/cron/custom_intervals.php';
 require_once CLICKEAT_SYNC_PATH . 'inc/handlers/branches.php';
 require_once CLICKEAT_SYNC_PATH . 'inc/handlers/products.php';
 require_once CLICKEAT_SYNC_PATH . 'inc/handlers/categories.php';
@@ -38,7 +39,7 @@ require_once CLICKEAT_SYNC_PATH . 'inc/img-helpers.php';
 require_once CLICKEAT_SYNC_PATH . 'inc/ajax.php';
 
 
-// Add this function to your plugin
+add_action('admin_enqueue_scripts', 'clickeat_enqueue_admin_scripts');
 function clickeat_enqueue_admin_scripts($hook)
 {
     // Only add to manual sync page
@@ -64,7 +65,7 @@ function clickeat_enqueue_admin_scripts($hook)
         ]
     );
 }
-add_action('admin_enqueue_scripts', 'clickeat_enqueue_admin_scripts');
+
 
 
 
@@ -116,7 +117,7 @@ function update_items_and_categories($json, $product_limit)
         setupCategories($categories);
         setupSubCategories($subcategories);
         setupBranches($branches);
-        setupProducts($products, $product_limit);
+        \Inc\Handlers\Product\setupProducts($products, $product_limit);
     } catch (Exception $e) {
         error_log('Error in setupCategories: ' . $e->getMessage());
         return false;
