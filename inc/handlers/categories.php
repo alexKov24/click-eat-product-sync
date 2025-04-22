@@ -7,10 +7,13 @@
  */
 function setupCategories($cats)
 {
+    $logger = new \Inc\Logger\WpDatabaseLogger();
+
     $options = get_option('clickeat_settings');
     $sync_img = $options['is_sync_img'];
 
     foreach ($cats as $cat) {
+        // deconstruct
         [
             'id' => $id,
             'name' => $name,
@@ -80,7 +83,6 @@ function setupCategories($cats)
         update_term_meta($term_id, 'order', $order);
         update_term_meta($term_id, 'business_hours', $businessHours);
 
-
-        error_log("Category created: $term_id");
+        $logger->info("Category created: $term_id", "categories.php");
     }
 }

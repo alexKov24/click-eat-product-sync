@@ -16,8 +16,8 @@ function setupProducts($products, $product_limit = -1)
     $options = get_option('clickeat_settings');
 
     if (!isset($options['product_post_type']) || empty($options['product_post_type'])) {
-        $logger->log('error', 'Cannot create product post. Product post type not set');
-        throw new Exception('[ERROR] Cannot create product post. Product post type not set');
+        $logger->error('Cannot create product post. Product post type not set');
+        throw new \Exception('[ERROR] Cannot create product post. Product post type not set');
     }
 
     $product_post_type = $options['product_post_type'];
@@ -25,6 +25,9 @@ function setupProducts($products, $product_limit = -1)
     $sync_img = $options['is_sync_img'];
 
     $products_num = 0;
+
+
+    $logger->info("syncing products " . count($products));
     foreach ($products as $product) {
         if ($products_num++ >= $product_limit && $product_limit != -1) {
             break;
@@ -46,11 +49,6 @@ function setupProducts($products, $product_limit = -1)
             'ordr' => $order
         ] = apply_filters('before_clickeat_product_handler', $product);
 
-
-        $logger->log('Sync Begin', "Syncing product $name $id");
-        $logger->log('log', "Syncing data " . print_r($product, true));
-
-
         // Check if product exists by clickeat_id
         $existing_product = get_posts([
             'post_type' => $product_post_type,
@@ -61,7 +59,7 @@ function setupProducts($products, $product_limit = -1)
         ]);
 
         if (empty($existing_product)) {
-            $logger->log('log', "product not found by clickeat_id $id");
+            $logger->debug("product not found by clickeat_id $id");
             // Create new product
             $post_data = [
                 'post_title' => $name,
@@ -71,10 +69,10 @@ function setupProducts($products, $product_limit = -1)
             ];
 
             $post_id = wp_insert_post($post_data);
-            $logger->log('log', "product created  $post_id");
+            $logger->debug("product created  $post_id");
         } else {
             $post_id = $existing_product[0]->ID;
-            $logger->log('log', "product found $post_id");
+            $logger->debug("product found $post_id");
 
             // Update existing product
             wp_update_post([
@@ -87,20 +85,20 @@ function setupProducts($products, $product_limit = -1)
 
         // Handle image
         if ($sync_img && $imageUrl) {
-            $logger->log('log', "Syncing image for $post_id");
+            $logger->debug("Syncing image for $post_id");
             $source_img_url = get_post_meta($post_id, 'source_img_url', true);
             if ($imageUrl != $source_img_url) {
                 delete_post_thumbnail_and_file($post_id);
                 $attach_id = upload_image_from_url($imageUrl);
-                $logger->log('log', 'old image deleted. new image uploaded.');
+                $logger->debug('old image deleted. new image uploaded.');
                 if (!is_wp_error($attach_id)) {
-                    $logger->log('log', "setting thumbnail for $post_id");
+                    $logger->debug("setting thumbnail for $post_id");
                     set_post_thumbnail($post_id, $attach_id);
                 }
             }
         }
 
-        $logger->log('log', "setting up product category $categoryId, subcategory $subcategoryId");
+        $logger->debug("setting up product category $categoryId, subcategory $subcategoryId");
         setupProductCategory($post_id, $categoryId, $subcategoryId);
 
 
@@ -121,12 +119,12 @@ function setupProducts($products, $product_limit = -1)
         delete_post_meta($post_id, 'branch');
 
         foreach ($branches as $branch) {
-            $logger->log('log', "adding branch $branch");
+            $logger->debug("adding branch $branch");
             add_post_meta($post_id, 'branch', $branch, false);
         }
 
         $saved_branches = get_post_meta($post_id, 'branch', false);
-        $logger->log('log', "Saved branches: " . print_r($saved_branches, true));
+        $logger->debug("Saved branches: " . print_r($saved_branches, true));
     }
 }
 
