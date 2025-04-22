@@ -256,21 +256,16 @@ function clickeat_cron_interval_field()
 function clickeat_sanitize_settings($input)
 {
     $sanitized = [];
-
     // Sanitize API URL
     $sanitized['api_url'] = esc_url_raw($input['api_url']);
-
     $sanitized['product_post_type'] = sanitize_text_field($input['product_post_type']);
     $sanitized['branch_post_type'] = sanitize_text_field($input['branch_post_type']);
-
     // Sanitize cron settings
     $sanitized['is_sync_img'] = isset($input['is_sync_img']) ? 1 : 0;
     $sanitized['cron_enabled'] = isset($input['cron_enabled']) ? 1 : 0;
     $sanitized['cron_interval'] = sanitize_text_field($input['cron_interval']);
     $sanitized['cron_offset'] = intval($input['cron_offset']);
-
     $sanitized['log_enabled'] = isset($input['log_enabled']) ? 1 : 0;
-
     // Update cron schedule if settings changed
     $old_options = get_option('clickeat_settings');
     if (
@@ -278,30 +273,24 @@ function clickeat_sanitize_settings($input)
         $sanitized['cron_interval'] !== ($old_options['cron_interval'] ?? 'clickeat_set_hour_daily') ||
         $sanitized['cron_offset'] !== ($old_options['cron_offset'] ?? 0)
     ) {
-
         // Clear existing schedule
         wp_clear_scheduled_hook('clickeat_sync_event');
-
         // Set new schedule if enabled
         if ($sanitized['cron_enabled']) {
-            // Calculate next run time based on offset
-            $now = current_time('timestamp');
-            $current_hour = intval(date('G', $now));
-            $target_hour = $sanitized['cron_offset'];
+            // Get the WordPress site's local time
+            $date = current_time('Y-m-d');
+            $time_str = sprintf('%02d:00', $sanitized['cron_offset']);
 
-            // Calculate when the next run should be
-            if ($current_hour >= $target_hour) {
-                // Start tomorrow at target hour
-                $start_time = strtotime("tomorrow {$target_hour}:00", $now);
-            } else {
-                // Start today at target hour
-                $start_time = strtotime("today {$target_hour}:00", $now);
-            }
+            // Combine date with the provided time
+            $datetime_str = $date . ' ' . $time_str;
 
-            wp_schedule_event($start_time, $sanitized['cron_interval'], 'clickeat_sync_event');
+            // Create DateTime object with the site's timezone
+            $timezone = wp_timezone();
+            $datetime = new DateTime($datetime_str, $timezone);
+
+            wp_schedule_event($datetime->getTimestamp(), $sanitized['cron_interval'], 'clickeat_sync_event');
         }
     }
-
     return $sanitized;
 }
 
@@ -309,6 +298,7 @@ function clickeat_cron_offset_field()
 {
     $options = get_option('clickeat_settings');
     $offset = isset($options['cron_offset']) ? intval($options['cron_offset']) : 0;
+    $datetime = new DateTime('now', new DateTimeZone(wp_timezone_string()));
 ?>
     <select name="clickeat_settings[cron_offset]">
         <?php
@@ -318,13 +308,13 @@ function clickeat_cron_offset_field()
         }
         ?>
     </select>
-    <p class="description">Select when you want the sync to start (in 24-hour format)</p>
+    <p class="description">Current Server Time: <?php echo $datetime->format('Y-m-d H:i:s'); ?><br>Select when you want the sync to start (in 24-hour format)</p>
+
 <?php
 }
 
 function show_cron_status()
 {
-
     $next_scheduled = wp_next_scheduled('clickeat_sync_event');
     $options = get_option('clickeat_settings');
     $is_enabled = isset($options['cron_enabled']) && $options['cron_enabled'];
@@ -332,8 +322,19 @@ function show_cron_status()
     echo '<p><strong>Auto Sync:</strong> ' . ($is_enabled ? 'Enabled' : 'Disabled') . '</p>';
 
     if ($next_scheduled) {
-        $time_diff = human_time_diff($next_scheduled, current_time('timestamp'));
-        echo '<p><strong>Next Run:</strong> ' . date('F j, Y, g:i a', $next_scheduled) . ' (in ' . $time_diff . ')</p>';
+        // Create DateTime object from the GMT timestamp
+        $dt = new DateTime('@' . $next_scheduled);
+        // Set it to the WordPress timezone
+        $dt->setTimezone(new DateTimeZone(wp_timezone_string()));
+
+        $current_time_gmt = time();
+        $time_diff = human_time_diff($current_time_gmt, $next_scheduled);
+
+        // Format the date using the DateTime object directly
+        $formatted_date = $dt->format(get_option('date_format') . ' ' . get_option('time_format'));
+
+        echo '<p>Next Scheduled Raw: ' . $next_scheduled . '</p>';
+        echo '<p><strong>Next Run:</strong> ' . $formatted_date . ' (in ' . $time_diff . ')</p>';
     } else {
         echo '<p><strong>Next Run:</strong> Not scheduled</p>';
     }
@@ -341,7 +342,7 @@ function show_cron_status()
     if ($is_enabled) {
         $offset = isset($options['cron_offset']) ? sprintf("%02d:00", $options['cron_offset']) : "00:00";
         echo '<p><strong>Current Interval:</strong> ' .
-            ucfirst($options['cron_interval'] ?? 'hourly') . '</p>';
+            ucfirst($options['cron_interval'] ?? 'clickeat_set_hour_daily') . '</p>';
         echo '<p><strong>Start Time:</strong> ' . $offset . '</p>';
     }
 }
